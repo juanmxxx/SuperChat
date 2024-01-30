@@ -3,7 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class SocketTCPServer {
-
+//PRUEBA PARA SEGUNDO COMMIT
     public static void main(String[] args) {
         ServerSocket serverSocket = null;
 
