@@ -24,7 +24,7 @@ public class GestorProcesos extends Thread {
 
         String message;
         while ((message = reader.readLine()) != null) {
-            System.out.println("(Servidor) Mensaje recibido: " + message);
+            System.out.println("(Servidor) " + message);
             if (message.equals("END")) {
                 break;
             }

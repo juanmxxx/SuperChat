@@ -5,7 +5,7 @@ import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class SocketTCPClient {
-
+    private static String nombre;
     public static void main(String[] args) {
         Socket socket = null;
 
@@ -31,16 +31,21 @@ public class SocketTCPClient {
 
              */
 
+            registrarse();
             // Enviar mensajes al servidor
             OutputStream os = socket.getOutputStream();
             Scanner scanner = new Scanner(System.in);
             while (true) {
                 System.out.print("Enter a message (type 'END' to exit): ");
                 String message = scanner.nextLine();
-                os.write((message + "\n").getBytes());
-                os.flush();
+
                 if (message.equals("END")) {
                     break;
+                }else {
+                    //Si el cliente no ha escrito "END" ya se contruye el mensaje con su nombre asignado y lo envia
+                    message = nombre + ": " + message;
+                    os.write((message + "\n").getBytes());
+                    os.flush();
                 }
             }
 
@@ -57,5 +62,12 @@ public class SocketTCPClient {
                 }
             }
         }
+    }
+
+
+    public static void registrarse(){
+        Scanner sc = new Scanner(System.in);
+        System.out.println("Con que nombre desea registrarse en el SUPER CHAT???!!!!");
+        nombre = sc.nextLine();
     }
 }
