@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -13,7 +14,7 @@ public class SocketTCPClient {
             socket = new Socket("localhost", 49171);
             System.out.println("(Cliente) Conexión establecida.");
 
-            /*
+
             // Iniciar el hilo para recibir mensajes del servidor
             Socket finalSocket = socket;
             new Thread(() -> {
@@ -29,7 +30,7 @@ public class SocketTCPClient {
                 }
             }).start();
 
-             */
+
 
             registrarse();
             // Enviar mensajes al servidor
@@ -41,7 +42,7 @@ public class SocketTCPClient {
 
                 if (message.equals("END")) {
                     break;
-                }else {
+                }else if(!message.isEmpty()){
                     //Si el cliente no ha escrito "END" ya se contruye el mensaje con su nombre asignado y lo envia
                     message = nombre + ": " + message;
                     os.write((message + "\n").getBytes());
