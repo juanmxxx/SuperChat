@@ -1,6 +1,4 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.Socket;
 
 public class GestorProcesos extends Thread {
@@ -19,18 +17,30 @@ public class GestorProcesos extends Thread {
         }
     }
 
+    public void guardarMensajeTexto(String mensaje) {
+        try {
+            FileWriter fw = new FileWriter("chat.txt", true);
+            fw.write("\r\n" + mensaje);
+            fw.close();
+        } catch (Exception var3) {
+            System.out.println(var3);
+        }
+
+    }
+
+    public void enviarMensajeServidor(String message) throws IOException {
+        OutputStream os = socket.getOutputStream();
+        os.write((message + "\n").getBytes());
+        os.flush();
+    }
+
     private void realizarProceso() throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
         String message;
-        while ((message = reader.readLine()) != null) {
-            System.out.println("(Servidor) " + message);
-            if (message.equals("END")) {
-                break;
-            }
+        if (reader.readLine() != null) {
+            message = reader.readLine();
+            enviarMensajeServidor(message);
         }
-
-        reader.close();
-        socket.close();
     }
 }
