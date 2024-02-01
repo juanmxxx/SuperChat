@@ -1,36 +1,33 @@
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Scanner;
 
 public class SocketTCPClient {
     private static String nombre;
+    private static InputStreamReader isr;
+    private static BufferedReader br;
+    private static InputStream is;
     public static void main(String[] args) {
         Socket socket = null;
 
         try {
             socket = new Socket("localhost", 49171);
+            is = socket.getInputStream();
             System.out.println("(Cliente) Conexión establecida.");
 
-
-            // Iniciar el hilo para recibir mensajes del servidor
             Socket finalSocket = socket;
             new Thread(() -> {
-                try {
-                    InputStream is = finalSocket.getInputStream();
-                    Scanner scanner = new Scanner(is);
-                    while (scanner.hasNextLine()) {
-                        String message = scanner.nextLine();
-                        System.out.println("(Cliente) Mensaje del servidor: " + message);
+                while (true) {
+                    try {
+                        leerMensajes(finalSocket);
+                    } catch (IOException | InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
             }).start();
-
-
 
             registrarse();
             // Enviar mensajes al servidor
@@ -44,10 +41,11 @@ public class SocketTCPClient {
                     break;
                 }else if(!message.isEmpty()){
                     //Si el cliente no ha escrito "END" ya se contruye el mensaje con su nombre asignado y lo envia
-                    message = nombre + ": " + message;
+                    message = horaActual() + " <" + nombre + "> " + message;
                     os.write((message + "\n").getBytes());
                     os.flush();
                 }
+
             }
 
         } catch (UnknownHostException e) {
@@ -65,10 +63,25 @@ public class SocketTCPClient {
         }
     }
 
-
     public static void registrarse(){
         Scanner sc = new Scanner(System.in);
         System.out.println("Con que nombre desea registrarse en el SUPER CHAT???!!!!");
         nombre = sc.nextLine();
+    }
+
+    public static String horaActual(){
+        LocalTime time = LocalTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        return "[" + time.format(formatter) + "]";
+    }
+
+    public static void leerMensajes(Socket socket) throws IOException, InterruptedException {
+        br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        String message;
+        while ((message = br.readLine()) != null) {
+            System.out.println(message);
+        }
+        br.close();
+        socket.close();
     }
 }
