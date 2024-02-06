@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -10,6 +11,8 @@ public class SocketTCPServer {
     static ServerSocket serverSocket = null;
     static BufferedReader reader;
     static String logLines;
+    
+    
     public static void main(String[] args) {
         updateFileName();
         try {
@@ -34,11 +37,20 @@ public class SocketTCPServer {
                  * desde el lado del cliente, como son concurrentes, pues soluciona el impas de recepcion de mansajes desde
                  * distintos clientes, 1 hilo por cliente
                  */
+
                 new Thread(() -> {
                     try {
                         leerMensajeClientes(clientSocket);
                     } catch (IOException | InterruptedException e) {
-                        throw new RuntimeException(e);
+                         if (e instanceof SocketException) {
+                            // Manejar la excepción específica cuando el socket está cerrado
+                            // Por ejemplo, imprimir un mensaje o realizar alguna acción específica
+                            System.out.println("El socket ha sido cerrado.");
+                        } else {
+                            // En caso de que la excepción no sea una SocketException de "Socket closed",
+                            // puedes lanzar una RuntimeException con la excepción original
+                            throw new RuntimeException(e);
+                        }
                     }
                 }).start();
                 /**

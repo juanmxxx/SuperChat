@@ -10,6 +10,8 @@ public class SocketTCPClient {
     private static InputStreamReader isr;
     private static BufferedReader br;
     private static InputStream is;
+
+
     public static void main(String[] args) {
         Socket socket = null;
 
@@ -17,6 +19,7 @@ public class SocketTCPClient {
             socket = new Socket("localhost", 49171);
             is = socket.getInputStream();
             System.out.println("(Cliente) Conexión establecida.");
+
 
             Socket finalSocket = socket;
             new Thread(() -> {
@@ -28,6 +31,8 @@ public class SocketTCPClient {
                     }
                 }
             }).start();
+
+
 
             registrarse();
             // Enviar mensajes al servidor
@@ -83,5 +88,21 @@ public class SocketTCPClient {
         }
         br.close();
         socket.close();
+    }
+
+
+    public static void leerMensajesTexto(String rutaArchivo) {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(rutaArchivo));
+
+            String linea;
+            while ((linea = br.readLine()) != null) {
+                System.out.println(linea);
+            }
+
+            br.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
