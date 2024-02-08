@@ -1,3 +1,5 @@
+package clientServer;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -7,7 +9,6 @@ import java.util.Scanner;
 
 public class SocketTCPClient {
     private static String nombre;
-    private static InputStreamReader isr;
     private static BufferedReader br;
     private static InputStream is;
 
@@ -49,6 +50,7 @@ public class SocketTCPClient {
                     message = horaActual() + " <" + nombre + "> " + message;
                     os.write((message + "\n").getBytes());
                     os.flush();
+                    System.out.println("mensaje enviado....");
                 }
 
             }
