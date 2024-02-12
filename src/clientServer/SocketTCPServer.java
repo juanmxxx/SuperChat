@@ -4,25 +4,29 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class SocketTCPServer {
+
     private static String nameLogFile = "src\\registros\\chatLog.txt";
     private static ServerSocket serverSocket = null;
     private static ArrayList<OutputStream> clientOutputStreams = new ArrayList<>();
-
+    private static File serverFile = new File(timeMethods.getPath());
     public static void main(String[] args) {
 
-        updateFileName();
+        try {
+            updateFileName();
+            generateInfo();
+        } catch (IOException e) {
+            tratamientoMensajes("Error generacion informacion servidor");
+        }
+
         try {
             serverSocket = new ServerSocket(49171);
             tratamientoMensajes("(Servidor) Esperando conexiones...");
 
             while (true) {
                 Socket clientSocket = serverSocket.accept(); //AQUI LLEGA CUANDO SE CONECTA UN NUEVO CLIENTE Y SE REPITE LA EXPLICACION
-                tratamientoMensajes("(Servidor) Nuevo cliente conectado.");
 
                 OutputStream os = clientSocket.getOutputStream();
                 clientOutputStreams.add(os);
@@ -47,7 +51,6 @@ public class SocketTCPServer {
                         cerrarConexion(clientSocket);
                     } catch (IOException | InterruptedException e) {
                         if (e instanceof SocketException) {
-                            tratamientoMensajes("(Servidor) Cliente desconectado.");
                         } else {
                             e.printStackTrace();
                         }
@@ -92,49 +95,54 @@ public class SocketTCPServer {
 
         boolean seguirLeyendo = true;
         while (seguirLeyendo) {
-            
+
             String msj = reader.readLine();
             if (msj == null || msj.equals("Desconectame")) {
                 seguirLeyendo = false;
-            } else 
+            } else {
                 tratamientoMensajes(msj);
-            
+            }
+
         }
         reader.close();
     }
-    
-    private static void broadcast(String message) { 
-        if(!clientOutputStreams.isEmpty()){
+
+    private static void broadcast(String message) {
+        if (!clientOutputStreams.isEmpty()) {
             for (OutputStream os : clientOutputStreams) {
                 try {
                     os.write((message + "\n").getBytes());
                     os.flush();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
         }
     }
-    
-    
-    private static void tratamientoMensajes(String message){
+
+    private static void tratamientoMensajes(String message) {
+        message = timeMethods.horaActual() + " " + message;
         System.out.println(message);
         broadcast(message);
         guardarMensajeTexto(message);
     }
-    
-    
+
     public static void cerrarConexion(Socket clientSocket) throws IOException {
         clientOutputStreams.remove(clientSocket.getOutputStream());
     }
 
     public static void updateFileName() {
-        String fechaHoraActual = formatter(LocalDateTime.now());
         String[] nameLogTroceado = nameLogFile.split("\\.");
-        nameLogFile = nameLogTroceado[0] + fechaHoraActual + "." + nameLogTroceado[1];
+        nameLogFile = nameLogTroceado[0] + timeMethods.fechaHoraActual() + "." + nameLogTroceado[1];
     }
 
-    private static String formatter(LocalDateTime fechaHoraActual) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy_HH-mm-ss");
-        // Formatear la fecha y hora actual según el formato
-        return fechaHoraActual.format(formatter);
+    private static void generateInfo() throws IOException {
+        String path = timeMethods.getPath();
+        
+        if(serverFile.exists())
+            serverFile.delete();
+        
+        serverFile = new File(path);
+        FileWriter fw = new FileWriter(path, true);
+
     }
 }
